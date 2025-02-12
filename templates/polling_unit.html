@@ -20,6 +20,25 @@
             text-align: center;
         }
 
+        nav {
+            background-color: #003366;
+            text-align: center;
+            justify-content: center;
+        }
+
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        nav ul li {
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
         h1 {
             font-size: 2rem;
             margin: 0;
@@ -45,10 +64,7 @@
         }
 
         li {
-            padding: 10px;
-            background-color: #e0e0e0;
-            margin-bottom: 10px;
-            border-radius: 4px;
+            align-self: center;
             font-size: 1.2rem;
         }
 
@@ -77,7 +93,17 @@
     </style>
 </head>
 <body>
+
+    
+
     <header>
+        <nav>
+            <ul>
+                <li>
+                    <a style="text-decoration: none; color: #fff;" href="/">Home</a>
+                </li>
+            </ul>
+        </nav>
         <h1>Polling Unit Results for Polling Unit ID: {{ polling_unit_uniqueid }}</h1>
     </header>
 
@@ -95,7 +121,7 @@
     </div>
 
     <footer>
-        <p>&copy; <span id="year"></span> Polling App. All rights reserved.</p>
+        <p style="color: #fff;">&copy; <span id="year"></span> Polling App. All rights reserved.</p>
     </footer>
     
     <script>

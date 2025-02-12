@@ -16,8 +16,35 @@
         header {
             background-color: #003366;
             color: #fff;
-            padding: 20px;
+            padding-top: 10px;
+            padding-bottom: 10px;
             text-align: center;
+        }
+
+        nav {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            background-color: #003366;
+            text-align: center;
+            justify-content: space-evenly;
+            gap: 20%;
+            align-items: center;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            border-top: none;
+            border-right: none;
+            border-left: none;
+        }
+
+        nav ul {
+            display: flex;
+            gap: 5%;
+            width: 100%;
+            justify-content: center;
+            list-style: none;
+            border-radius: 1px;
+            border-bottom: #fff;
         }
 
         h1 {
@@ -83,6 +110,14 @@
 </head>
 <body>
 
+    <nav>
+         <ul>
+            <li><a style="text-decoration: none; color: #fff;" href="/">Home</a></li>
+            <li><a style="text-decoration: none; color: #fff;" href="./lga_results">LGA Results</a></li>
+            <li><a style="text-decoration: none; color: #fff;" href="./add_results">Add Results</a></li>
+         </ul>
+    </nav>
+
     <header>
         <h1>Polling Unit Results</h1>
     </header>
@@ -90,7 +125,7 @@
     <div class="form-container">
         <form id="pollingForm">
             <label for="polling_unit_uniqueid">Polling Unit Unique ID:</label>
-            <input type="text" id="polling_unit_uniqueid" name="polling_unit_uniqueid" required>
+            <input type="text" id="polling_unit_uniqueid" name="polling_unit_uniqueid" required pattern="\d+" title="Only numbers are allowed">
             <button type="submit">Fetch Results</button>
         </form>
     </div>

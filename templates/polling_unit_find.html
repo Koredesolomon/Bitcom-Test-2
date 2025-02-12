@@ -12,45 +12,56 @@
             margin: 0;
             padding: 0;
             color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Ensures content fills viewport */
         }
 
         header {
             background-color: #003366;
             color: #fff;
-            padding-top: 10px;
-            padding-bottom: 10px;
+            padding: 15px 0;
             text-align: center;
         }
 
         nav {
             width: 100%;
             display: flex;
-            flex-direction: row;
             background-color: #003366;
-            text-align: center;
-            justify-content: space-evenly;
-            gap: 20%;
-            align-items: center;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            border-top: none;
-            border-right: none;
-            border-left: none;
+            justify-content: center;
+            padding: 10px 10px;
         }
 
         nav ul {
             display: flex;
-            gap: 5%;
-            width: 100%;
-            justify-content: center;
+            gap: 20px;
             list-style: none;
-            border-radius: 1px;
-            border-bottom: #fff;
+            padding: 0;
+            margin: 0;
+        }
+
+        nav ul li {
+            display: inline;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: #fff;
+            font-size: 1rem;
+            padding: 10px 15px;
+            transition: background 0.3s;
+        }
+
+        nav ul li a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
         }
 
         h1 {
-            font-size: 2.5rem;
-            margin: 0;
+            font-size: 2rem;
+            margin: 20px 0;
+            color:#fff;
+            text-align: center;
         }
 
         .form-container {
@@ -96,26 +107,50 @@
             background-color: #00509e;
         }
 
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .form-container {
+                width: 95%;
+                padding: 15px;
+            }
+
+            input[type="text"] {
+                font-size: 1rem;
+            }
+
+            button {
+                font-size: 1rem;
+            }
+        }
+
+        /* Non-Fixed Footer */
         footer {
             text-align: center;
             padding: 15px;
             background-color: #003366;
             color: #fff;
             font-size: 0.9rem;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
+            margin-top: auto; /* Pushes footer to bottom naturally */
         }
-
     </style>
 </head>
 <body>
 
     <nav>
          <ul>
-            <li><a style="text-decoration: none; color: #fff;" href="/">Home</a></li>
-            <li><a style="text-decoration: none; color: #fff;" href="./lga_results">LGA Results</a></li>
-            <li><a style="text-decoration: none; color: #fff;" href="./add_results">Add Results</a></li>
+            <li><a href="/">Home</a></li>
+            <li><a href="./lga_results">LGA Results</a></li>
+            <li><a href="./add_results">Add Results</a></li>
          </ul>
     </nav>
 
@@ -137,10 +172,7 @@
     
     <script>
         document.getElementById("year").textContent = new Date().getFullYear();
-    </script>
-    
 
-    <script>
         document.getElementById("pollingForm").addEventListener("submit", function(event) {
             event.preventDefault(); // Prevent default form submission
             

@@ -17,46 +17,48 @@
         header {
             background-color: #003366;
             color: #fff;
-            padding: 10px 0;
+            padding: 15px;
             text-align: center;
         }
 
         nav {
             background-color: #003366;
             text-align: center;
-            justify-content: center;
+            padding: 10px 0;
         }
 
         nav ul {
-            list-style-type: none;
+            list-style: none;
             padding: 0;
-            align-items: center;
-            justify-content: space-between;
+            margin: 0;
+            display: flex;
+            justify-content: center;
         }
 
         nav ul li {
-            align-items: center;
-            justify-content: center;
-            text-align: center;
+            margin: 0 15px;
         }
 
-        h1 {
-            font-size: 2rem;
-            margin: 0;
-        }
-
-        h2 {
-            font-size: 1.5rem;
-            color: #003366;
+        nav ul li a {
+            text-decoration: none;
+            color: #fff;
+            font-size: 1.2rem;
         }
 
         .results-container {
-            width: 80%;
+            width: 90%;
+            max-width: 800px;
             margin: 20px auto;
             background-color: #fff;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            font-size: 1.5rem;
+            color: #003366;
+            text-align: center;
         }
 
         ul {
@@ -65,47 +67,53 @@
         }
 
         li {
-            align-self: center;
             font-size: 1.2rem;
+            padding: 10px;
         }
 
         li:nth-child(even) {
             background-color: #d3d3d3;
         }
 
-        p {
-            font-size: 1.1rem;
-            color: #555;
-        }
-
         .no-results {
             font-size: 1.1rem;
             color: #e74c3c;
             font-weight: bold;
+            text-align: center;
         }
 
         footer {
             text-align: center;
-            padding: 20px 0;
+            padding: 15px;
             background-color: #003366;
             color: #fff;
             font-size: 0.9rem;
         }
+
+        @media (max-width: 600px) {
+            nav ul {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            nav ul li {
+                margin: 5px 0;
+            }
+
+            .results-container {
+                padding: 15px;
+            }
+        }
     </style>
 </head>
 <body>
-
-    
-
     <header>
         <nav>
             <ul>
-                <li>
-                    <a style="text-decoration: none; color: #fff;" href="/">Home</a>
-                </li>
+                <li><a href="/">Home</a></li>
             </ul>
         </nav>
-        <h1>Polling Unit Results for Polling Unit ID: {{ polling_unit_uniqueid }}</h1>
+        <h1 style="color: #fff;">Polling Unit Results for Polling Unit ID: {{ polling_unit_uniqueid }}</h1>
     </header>
 
     <div class="results-container">
@@ -122,12 +130,11 @@
     </div>
 
     <footer>
-        <p style="color: #fff;">&copy; <span id="year"></span> Polling App. All rights reserved.</p>
+        <p>&copy; <span id="year"></span> Polling App. All rights reserved.</p>
     </footer>
     
     <script>
         document.getElementById("year").textContent = new Date().getFullYear();
     </script>
-    
 </body>
 </html>

@@ -3,6 +3,8 @@ import mysql.connector
 
 app = Flask(__name__)
 
+
+
 # 🔹 Function to Get DB Connection
 def get_db_connection():
     return mysql.connector.connect(

@@ -12,20 +12,86 @@ st.set_page_config(
 )
 
 
+SAMPLE_LGAS = [
+    {"lga_id": 1, "lga_name": "Aniocha North"},
+    {"lga_id": 2, "lga_name": "Oshimili South"},
+    {"lga_id": 3, "lga_name": "Warri South"},
+]
+
+SAMPLE_POLLING_UNITS = [
+    {"uniqueid": 1, "polling_unit_name": "Central Primary School", "lga_id": 1},
+    {"uniqueid": 2, "polling_unit_name": "Town Hall Ward 2", "lga_id": 1},
+    {"uniqueid": 3, "polling_unit_name": "Ogwashi Community Hall", "lga_id": 2},
+    {"uniqueid": 4, "polling_unit_name": "Marine Gate Polling Unit", "lga_id": 3},
+]
+
+SAMPLE_RESULTS = [
+    {"polling_unit_uniqueid": 1, "party_abbreviation": "PDP", "party_score": 124},
+    {"polling_unit_uniqueid": 1, "party_abbreviation": "APC", "party_score": 98},
+    {"polling_unit_uniqueid": 1, "party_abbreviation": "LP", "party_score": 76},
+    {"polling_unit_uniqueid": 2, "party_abbreviation": "PDP", "party_score": 88},
+    {"polling_unit_uniqueid": 2, "party_abbreviation": "APC", "party_score": 132},
+    {"polling_unit_uniqueid": 2, "party_abbreviation": "LP", "party_score": 45},
+    {"polling_unit_uniqueid": 3, "party_abbreviation": "PDP", "party_score": 140},
+    {"polling_unit_uniqueid": 3, "party_abbreviation": "APC", "party_score": 67},
+    {"polling_unit_uniqueid": 3, "party_abbreviation": "LP", "party_score": 110},
+    {"polling_unit_uniqueid": 4, "party_abbreviation": "PDP", "party_score": 72},
+    {"polling_unit_uniqueid": 4, "party_abbreviation": "APC", "party_score": 156},
+    {"polling_unit_uniqueid": 4, "party_abbreviation": "LP", "party_score": 92},
+]
+
+
+def init_demo_data():
+    if "demo_lgas" not in st.session_state:
+        st.session_state.demo_lgas = [row.copy() for row in SAMPLE_LGAS]
+    if "demo_polling_units" not in st.session_state:
+        st.session_state.demo_polling_units = [
+            row.copy() for row in SAMPLE_POLLING_UNITS
+        ]
+    if "demo_results" not in st.session_state:
+        st.session_state.demo_results = [row.copy() for row in SAMPLE_RESULTS]
+
+
+def get_secret_section(name):
+    try:
+        return st.secrets.get(name, {})
+    except Exception:
+        return {}
+
+
 def get_config_value(key):
     env_key = f"MYSQL_{key.upper()}"
     if os.getenv(env_key):
         return os.getenv(env_key)
 
-    mysql_secrets = st.secrets.get("mysql", {})
+    mysql_secrets = get_secret_section("mysql")
     if mysql_secrets.get(key):
         return mysql_secrets[key]
 
-    st.error(f"Missing MySQL setting: {key}")
-    st.stop()
+    return None
+
+
+def has_mysql_config():
+    return all(
+        get_config_value(key)
+        for key in ["host", "user", "password", "port", "database"]
+    )
+
+
+def use_demo_data():
+    return st.session_state.get("data_source") == "Demo data"
 
 
 def get_db_connection():
+    missing_keys = [
+        key
+        for key in ["host", "user", "password", "port", "database"]
+        if not get_config_value(key)
+    ]
+    if missing_keys:
+        st.error(f"Missing MySQL setting(s): {', '.join(missing_keys)}")
+        st.stop()
+
     return mysql.connector.connect(
         host=get_config_value("host"),
         user=get_config_value("user"),
@@ -57,20 +123,38 @@ def execute_write(query, params):
         conn.close()
 
 
-@st.cache_data(ttl=300)
 def get_lgas():
+    if use_demo_data():
+        return sorted(st.session_state.demo_lgas, key=lambda row: row["lga_name"])
+
     return fetch_all("SELECT lga_id, lga_name FROM lga ORDER BY lga_name")
 
 
-@st.cache_data(ttl=300)
 def get_polling_units():
+    if use_demo_data():
+        return sorted(
+            [
+                {
+                    "uniqueid": row["uniqueid"],
+                    "polling_unit_name": row["polling_unit_name"],
+                }
+                for row in st.session_state.demo_polling_units
+            ],
+            key=lambda row: row["polling_unit_name"],
+        )
+
     return fetch_all(
         "SELECT uniqueid, polling_unit_name FROM polling_unit ORDER BY polling_unit_name"
     )
 
 
-@st.cache_data(ttl=300)
 def get_parties():
+    if use_demo_data():
+        parties = {
+            row["party_abbreviation"] for row in st.session_state.demo_results
+        }
+        return [{"party_abbreviation": party} for party in sorted(parties)]
+
     return fetch_all(
         "SELECT DISTINCT party_abbreviation FROM announced_pu_results "
         "ORDER BY party_abbreviation"
@@ -78,6 +162,19 @@ def get_parties():
 
 
 def get_polling_unit_results(polling_unit_id):
+    if use_demo_data():
+        return sorted(
+            [
+                {
+                    "party_abbreviation": row["party_abbreviation"],
+                    "party_score": row["party_score"],
+                }
+                for row in st.session_state.demo_results
+                if row["polling_unit_uniqueid"] == polling_unit_id
+            ],
+            key=lambda row: row["party_abbreviation"],
+        )
+
     return fetch_all(
         """
         SELECT party_abbreviation, party_score
@@ -90,6 +187,23 @@ def get_polling_unit_results(polling_unit_id):
 
 
 def get_lga_results(lga_id):
+    if use_demo_data():
+        polling_unit_ids = {
+            row["uniqueid"]
+            for row in st.session_state.demo_polling_units
+            if row["lga_id"] == lga_id
+        }
+        totals = {}
+        for row in st.session_state.demo_results:
+            if row["polling_unit_uniqueid"] in polling_unit_ids:
+                party = row["party_abbreviation"]
+                totals[party] = totals.get(party, 0) + row["party_score"]
+
+        return [
+            {"party_abbreviation": party, "total_score": score}
+            for party, score in sorted(totals.items())
+        ]
+
     return fetch_all(
         """
         SELECT party_abbreviation, SUM(party_score) AS total_score
@@ -105,6 +219,13 @@ def get_lga_results(lga_id):
 
 
 def result_exists(polling_unit_id, party):
+    if use_demo_data():
+        return any(
+            row["polling_unit_uniqueid"] == polling_unit_id
+            and row["party_abbreviation"] == party
+            for row in st.session_state.demo_results
+        )
+
     rows = fetch_all(
         """
         SELECT 1
@@ -118,6 +239,24 @@ def result_exists(polling_unit_id, party):
 
 
 def upsert_result(polling_unit_id, party, score):
+    if use_demo_data():
+        for row in st.session_state.demo_results:
+            if (
+                row["polling_unit_uniqueid"] == polling_unit_id
+                and row["party_abbreviation"] == party
+            ):
+                row["party_score"] = score
+                return
+
+        st.session_state.demo_results.append(
+            {
+                "polling_unit_uniqueid": polling_unit_id,
+                "party_abbreviation": party,
+                "party_score": score,
+            }
+        )
+        return
+
     if result_exists(polling_unit_id, party):
         execute_write(
             """
@@ -152,6 +291,12 @@ def show_results_table(rows, score_column):
 def render_home():
     st.title("Polling App")
     st.write("View polling unit results, review LGA totals, and store new results.")
+
+    if use_demo_data():
+        st.info(
+            "Demo data mode is active. Saved results work in this browser session, "
+            "but they are not permanent."
+        )
 
     image_path = "static/images/election.webp"
     if os.path.exists(image_path):
@@ -232,13 +377,28 @@ def render_add_results():
         polling_unit_id = polling_unit_options[selected_polling_unit]
         try:
             upsert_result(polling_unit_id, selected_party, int(score))
-            st.cache_data.clear()
             st.success("Result saved successfully.")
             rows = get_polling_unit_results(polling_unit_id)
             show_results_table(rows, "party_score")
         except mysql.connector.Error as exc:
             st.error(f"Database error: {exc}")
 
+
+init_demo_data()
+
+data_source_options = ["Demo data", "MySQL database"]
+default_data_source = "Demo data"
+st.sidebar.selectbox(
+    "Data source",
+    data_source_options,
+    index=data_source_options.index(default_data_source),
+    key="data_source",
+)
+
+if use_demo_data():
+    st.sidebar.caption("Using built-in sample data.")
+else:
+    st.sidebar.caption("Using MySQL credentials from Streamlit Secrets.")
 
 page = st.sidebar.radio(
     "Navigation",

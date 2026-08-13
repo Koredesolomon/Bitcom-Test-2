@@ -38,3 +38,8 @@ The Streamlit app also supports these environment variables:
 - `MYSQL_PASSWORD`
 - `MYSQL_PORT`
 - `MYSQL_DATABASE`
+
+If Streamlit shows `Access denied for user ...`, the app reached MySQL but the
+database rejected the credentials or the remote host. Check that the Streamlit
+secrets exactly match the database credentials, and make sure the database user
+is allowed to connect from Streamlit Cloud.

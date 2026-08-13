@@ -12,28 +12,17 @@ st.set_page_config(
 )
 
 
-DEFAULT_DB_CONFIG = {
-    "host": "ol5tz0yvwp930510.cbetxkdyhwsb.us-east-1.rds.amazonaws.com",
-    "user": "dd5nl96p61stlpkk",
-    "password": "im8xqo3y6t3m8lni",
-    "port": "3306",
-    "database": "f3lfgdazfx4amtti",
-}
-
-
 def get_config_value(key):
     env_key = f"MYSQL_{key.upper()}"
     if os.getenv(env_key):
         return os.getenv(env_key)
 
-    try:
-        mysql_secrets = st.secrets.get("mysql", {})
-        if mysql_secrets.get(key):
-            return mysql_secrets[key]
-    except Exception:
-        pass
+    mysql_secrets = st.secrets.get("mysql", {})
+    if mysql_secrets.get(key):
+        return mysql_secrets[key]
 
-    return DEFAULT_DB_CONFIG[key]
+    st.error(f"Missing MySQL setting: {key}")
+    st.stop()
 
 
 def get_db_connection():

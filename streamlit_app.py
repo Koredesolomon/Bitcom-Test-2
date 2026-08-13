@@ -144,7 +144,7 @@ def show_results_table(rows, score_column):
         return
 
     df = pd.DataFrame(rows)
-    st.dataframe(df, use_container_width=True, hide_index=True)
+    st.dataframe(df, width="stretch", hide_index=True)
     total = int(df[score_column].fillna(0).sum())
     st.metric("Total votes", f"{total:,}")
 
@@ -155,7 +155,7 @@ def render_home():
 
     image_path = "static/images/election.webp"
     if os.path.exists(image_path):
-        st.image(image_path, use_container_width=True)
+        st.image(image_path, width="stretch")
 
 
 def render_polling_unit_results():
